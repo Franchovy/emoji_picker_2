@@ -1,0 +1,27 @@
+name: emoji_picker_2
+description: A Flutter package that provides an Emoji Keyboard widget with 390 emojis in 8 categories, faster loading time and skin color options.
+version: 0.1.0
+homepage: https://github.com/Franchovy/emoji_picker_2
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+  flutter: ">=1.10.0 <2.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  shared_preferences: ^0.5.4+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+#flutter:
+#  plugin:
+#    platforms:
+#      android:
+#        package: io.widgetlib.emojipickerskincolors
+#        pluginClass: EmojiPicker2
+#      ios:
+#        pluginClass: EmojiPicker2
