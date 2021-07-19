@@ -280,8 +280,54 @@ class Emoji {
   }
 }
 
+Future<String> skinColorDialog(BuildContext context, String emoji) async {
+  var returnEmoji = emoji;
+
+  final onTap = () {
+    returnEmoji = emoji;
+    Navigator.pop(context);
+  };
+
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Pick emoji skin color'),
+        content: Row(
+          children: [
+            GestureDetector(child: Text(emoji)),
+            GestureDetector(
+              child: Text(emoji + "🏻"),
+              onTap: onTap,
+            ),
+            GestureDetector(
+              child: Text(emoji + "🏼"),
+              onTap: onTap,
+            ),
+            GestureDetector(
+              child: Text(emoji + "🏽"),
+              onTap: onTap,
+            ),
+            GestureDetector(
+              child: Text(emoji + "🏾"),
+              onTap: onTap,
+            ),
+            GestureDetector(
+              child: Text(emoji + "🏿"),
+              onTap: onTap,
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  return returnEmoji;
+}
+
 class _EmojiPickerState extends State<EmojiPicker2> {
-  static const platform = const MethodChannel("emoji_picker");
+  static const platform = const MethodChannel("emoji_picker_2");
 
   List<Widget> pages = [];
   int recommendedPagesNum;
@@ -436,6 +482,18 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     recommendedPagesNum = 0;
     List<_Recommended> recommendedEmojis = [];
     List<Widget> recommendedPages = [];
+
+    final onPressed = (int index, int i) {
+      var emoji =
+          smileyMap.values.toList()[index + (widget.columns * widget.rows * i)];
+      skinColorDialog(context, emoji).then((returnEmoji) =>
+          widget.onEmojiSelected(
+              Emoji(
+                  name: smileyMap.keys
+                      .toList()[index + (widget.columns * widget.rows * i)],
+                  emoji: returnEmoji),
+              widget.selectedCategory));
+    };
 
     if (widget.recommendKeywords != null) {
       allNames.forEach((name) {
@@ -660,47 +718,29 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        emojiTxt,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: smileyMap.keys.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              emoji: smileyMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              emojiTxt,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        emojiTxt,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: smileyMap.keys.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              emoji: smileyMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              emojiTxt,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();
@@ -733,49 +773,32 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        animalMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: animalMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              animalMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: animalMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        animalMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: animalMap.keys.toList()[
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              animalMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: animalMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
+
                   break;
                 default:
                   return Container();
@@ -809,49 +832,31 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        foodMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: foodMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              foodMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: foodMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        foodMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: foodMap.keys.toList()[
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              foodMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: foodMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();
@@ -885,49 +890,31 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        travelMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: travelMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              travelMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: travelMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        travelMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: travelMap.keys.toList()[
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              travelMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: travelMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();
@@ -964,48 +951,30 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        activityMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: activityMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              activityMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: activityMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        emojiTxt,
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: activityMap.keys.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              emoji: activityMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              emojiTxt,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();
@@ -1039,49 +1008,31 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        objectMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: objectMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              objectMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: objectMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        objectMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: objectMap.keys.toList()[
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              objectMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: objectMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();
@@ -1115,49 +1066,31 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        symbolMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: symbolMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              symbolMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: symbolMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        symbolMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: symbolMap.keys.toList()[
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              symbolMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: symbolMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();
@@ -1191,49 +1124,31 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 case ButtonMode.MATERIAL:
                   return Center(
                       child: TextButton(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                    ),
-                    child: Center(
-                      child: Text(
-                        flagMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: flagMap.keys.toList()[
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              flagMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: flagMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
                       child: CupertinoButton(
-                    pressedOpacity: 0.4,
-                    padding: EdgeInsets.all(0),
-                    child: Center(
-                      child: Text(
-                        flagMap.values.toList()[
-                            index + (widget.columns * widget.rows * i)],
-                        style: TextStyle(fontSize: 24),
-                      ),
-                    ),
-                    onPressed: () {
-                      widget.onEmojiSelected(
-                          Emoji(
-                              name: flagMap.keys.toList()[
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              flagMap.values.toList()[
                                   index + (widget.columns * widget.rows * i)],
-                              emoji: flagMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)]),
-                          widget.selectedCategory);
-                    },
-                  ));
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: onPressed(index, i)));
                   break;
                 default:
                   return Container();

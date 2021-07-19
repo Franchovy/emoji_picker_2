@@ -1,3 +1,9 @@
+## [0.1.1] - 19/07/2021
+* Updated to current flutter version
+* Updated package to emoji_picker_2
+* Updated to new author
+
+
 ## [0.1.0] - 09/01/2020
 * Added documentation
 
