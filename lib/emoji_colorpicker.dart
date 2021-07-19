@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class EmojiColorPicker extends StatelessWidget {
   EmojiColorPicker(this.emoji);
 
-  String emoji;
+  final String emoji;
 
   @override
   Widget build(BuildContext context) {
