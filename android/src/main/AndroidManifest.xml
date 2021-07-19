@@ -1,3 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.jeffg.emoji_picker">
+  package="io.widgetLib.emoji_picker_2">
 </manifest>

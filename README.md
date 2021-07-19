@@ -1,6 +1,6 @@
 # Flutter Emoji Keyboard
 
-[![pub package](https://img.shields.io/pub/v/emoji_picker_with_skincolors.svg)](https://pub.dartlang.org/packages/emoji_picker_with_skincolors)
+[![pub package](https://img.shields.io/pub/v/emoji_picker_2.svg)](https://pub.dartlang.org/packages/emoji_picker_2)
 
 A Flutter package that provides an Emoji Keyboard widget.
 
@@ -13,13 +13,13 @@ A Flutter package that provides an Emoji Keyboard widget.
 
 
 ## Usage
-To use this plugin, add `emoji_picker_with_skincolors` as dependency in your pubspec.yaml file.
+To use this plugin, add `emoji_picker_2` as dependency in your pubspec.yaml file.
 
 ## Sample Usage
 
 ```
 import 'package:flutter/material.dart';
-import 'package:emoji_picker/emoji_picker.dart';
+import 'package:emoji_picker_2/emoji_picker_2.dart';
 
 void main() => runApp(MainApp());
 
@@ -46,7 +46,7 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    return EmojiPicker(
+    return EmojiPicker2(
       rows: 3,
       columns: 7,
       recommendKeywords: ["racing", "horse"],

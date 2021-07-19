@@ -1,4 +1,4 @@
-package com.jeffg.emoji_picker_test;
+package io.widgetlib.emoji_picker_2_test;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;

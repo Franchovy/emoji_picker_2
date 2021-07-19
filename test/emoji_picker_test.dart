@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const MethodChannel channel = MethodChannel('emoji_picker');
+  const MethodChannel channel = MethodChannel('emoji_picker_2');
 
   TestWidgetsFlutterBinding.ensureInitialized();
 

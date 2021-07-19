@@ -1,4 +1,4 @@
-group 'com.jeffg.emoji_picker'
+group 'io.widgetlib.emoji_picker_2'
 version '0.0.3'
 
 buildscript {

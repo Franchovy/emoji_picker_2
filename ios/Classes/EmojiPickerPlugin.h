@@ -1,4 +1,4 @@
 #import <Flutter/Flutter.h>
 
-@interface EmojiPickerPlugin : NSObject<FlutterPlugin>
+@interface EmojiPicker2Plugin : NSObject<FlutterPlugin>
 @end
