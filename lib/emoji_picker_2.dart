@@ -293,7 +293,8 @@ Future<String> skinColorDialog(BuildContext context, String emoji) async {
     barrierDismissible: true,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Pick emoji skin color'),
+        title: Text('Pick emoji skin color',
+            style: Theme.of(context).textTheme.subtitle1),
         content: Row(
           children: [
             GestureDetector(child: Text(emoji)),
@@ -483,13 +484,13 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     List<_Recommended> recommendedEmojis = [];
     List<Widget> recommendedPages = [];
 
-    final onPressed = (int index, int i) {
+    final onPressed = (int index, int i, emojiMap) {
       var emoji =
-          smileyMap.values.toList()[index + (widget.columns * widget.rows * i)];
+          emojiMap.values.toList()[index + (widget.columns * widget.rows * i)];
       skinColorDialog(context, emoji).then((returnEmoji) =>
           widget.onEmojiSelected(
               Emoji(
-                  name: smileyMap.keys
+                  name: emojiMap.keys
                       .toList()[index + (widget.columns * widget.rows * i)],
                   emoji: returnEmoji),
               widget.selectedCategory));
@@ -727,7 +728,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, smileyPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -740,7 +741,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, smileyPages)));
                   break;
                 default:
                   return Container();
@@ -783,7 +784,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, animalPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -797,7 +798,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, animalPages)));
 
                   break;
                 default:
@@ -842,7 +843,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, foodMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -856,7 +857,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, foodMap)));
                   break;
                 default:
                   return Container();
@@ -900,7 +901,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, travelPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -914,7 +915,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, travelPages)));
                   break;
                 default:
                   return Container();
@@ -961,7 +962,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, activityPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -974,7 +975,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, activityPages)));
                   break;
                 default:
                   return Container();
@@ -1018,7 +1019,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, objectPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -1032,7 +1033,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, objectPages)));
                   break;
                 default:
                   return Container();
@@ -1076,7 +1077,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, symbolPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -1090,7 +1091,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, symbolPages)));
                   break;
                 default:
                   return Container();
@@ -1134,7 +1135,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, flagPages)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -1148,7 +1149,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i)));
+                          onPressed: onPressed(index, i, flagPages)));
                   break;
                 default:
                   return Container();
