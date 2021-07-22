@@ -47,7 +47,7 @@
       "name": "emoji_picker_2",
       "rootUri": "../../",
       "packageUri": "lib/",
-      "languageVersion": "2.6"
+      "languageVersion": "2.3"
     },
     {
       "name": "fake_async",
@@ -254,7 +254,7 @@
       "languageVersion": "2.1"
     }
   ],
-  "generated": "2021-07-22T17:48:33.998819Z",
+  "generated": "2021-07-22T17:50:31.426259Z",
   "generator": "pub",
   "generatorVersion": "2.12.3"
 }
