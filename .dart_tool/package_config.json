@@ -239,10 +239,10 @@
       "name": "emoji_picker_2",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "2.3"
+      "languageVersion": "2.6"
     }
   ],
-  "generated": "2021-07-22T11:35:49.802130Z",
+  "generated": "2021-07-22T17:33:15.834312Z",
   "generator": "pub",
   "generatorVersion": "2.12.3"
 }
