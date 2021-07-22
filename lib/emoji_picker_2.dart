@@ -280,53 +280,6 @@ class Emoji {
   }
 }
 
-Future<String> skinColorDialog(BuildContext context, String emoji) async {
-  var returnEmoji = emoji;
-
-  final onTap = () {
-    returnEmoji = emoji;
-    Navigator.pop(context);
-  };
-
-  await showDialog<void>(
-    context: context,
-    barrierDismissible: true,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Pick emoji skin color',
-            style: Theme.of(context).textTheme.subtitle1),
-        content: Row(
-          children: [
-            GestureDetector(child: Text(emoji)),
-            GestureDetector(
-              child: Text(emoji + "🏻"),
-              onTap: onTap,
-            ),
-            GestureDetector(
-              child: Text(emoji + "🏼"),
-              onTap: onTap,
-            ),
-            GestureDetector(
-              child: Text(emoji + "🏽"),
-              onTap: onTap,
-            ),
-            GestureDetector(
-              child: Text(emoji + "🏾"),
-              onTap: onTap,
-            ),
-            GestureDetector(
-              child: Text(emoji + "🏿"),
-              onTap: onTap,
-            ),
-          ],
-        ),
-      );
-    },
-  );
-
-  return returnEmoji;
-}
-
 class _EmojiPickerState extends State<EmojiPicker2> {
   static const platform = const MethodChannel("emoji_picker_2");
 
@@ -365,6 +318,58 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     });
   }
 
+  List<int> units(codepoint) {
+    final int tmp = codepoint - 0x10000;
+    final padded = tmp.toRadixString(2).padLeft(20, '0');
+    final unit1 = int.parse(padded.substring(0, 10), radix: 2) + 0xD800;
+    final unit2 = int.parse(padded.substring(10), radix: 2) + 0xDC00;
+
+    return [unit1, unit2];
+  }
+
+  Future<String> skinColorDialog(BuildContext context, String emoji) async {
+    var returnEmoji = emoji;
+
+    final Function onTap = (BuildContext context) {
+      returnEmoji = emoji;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+      });
+    };
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Pick emoji skin color',
+              style: Theme.of(context).textTheme.subtitle1),
+          content: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(child: Text(emoji)),
+              for (var skinCode in [
+                0x1F3FB,
+                0x1F3FC,
+                0x1F3FD,
+                0x1F3FE,
+                0x1F3FF
+              ])
+                GestureDetector(
+                  child: Text(String.fromCharCodes(
+                      [...emoji.codeUnits, ...units(skinCode)])),
+                  onTap: () => onTap(context),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return returnEmoji;
+  }
+
   Future<bool> _isEmojiAvailable(String emoji) async {
     if (Platform.isAndroid) {
       bool isAvailable;
@@ -396,21 +401,29 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     }
   }
 
+  SharedPreferences _sharedPreferences;
+
   Future<List<String>> getRecentEmojis() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
     final key = "recents";
-    recentEmojis = prefs.getStringList(key) ?? [];
+    recentEmojis = _sharedPreferences.getStringList(key) ?? [];
     return recentEmojis;
   }
 
   void addRecentEmoji(Emoji emoji) async {
-    final prefs = await SharedPreferences.getInstance();
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
     final key = "recents";
     getRecentEmojis().then((_) {
       print("adding emoji");
       setState(() {
         recentEmojis.insert(0, emoji.name);
-        prefs.setStringList(key, recentEmojis);
+        _sharedPreferences.setStringList(key, recentEmojis);
       });
     });
   }
@@ -419,7 +432,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
       {@required String title}) async {
     Map<String, String> newMap;
 
-    newMap = await restoreFilteredEmojis(title);
+    newMap = restoreFilteredEmojis(title);
 
     if (newMap != null) {
       return newMap;
@@ -427,22 +440,19 @@ class _EmojiPickerState extends State<EmojiPicker2> {
 
     newMap = await _getFiltered(map);
 
-    await cacheFilteredEmojis(title, newMap);
+    cacheFilteredEmojis(title, newMap);
 
     return newMap;
   }
 
-  Future<void> cacheFilteredEmojis(
-      String title, Map<String, String> emojis) async {
-    final prefs = await SharedPreferences.getInstance();
+  void cacheFilteredEmojis(String title, Map<String, String> emojis) {
     String emojiJson = jsonEncode(emojis);
-    prefs.setString(title, emojiJson);
+    _sharedPreferences.setString(title, emojiJson);
     return;
   }
 
-  Future<Map<String, String>> restoreFilteredEmojis(String title) async {
-    final prefs = await SharedPreferences.getInstance();
-    String emojiJson = prefs.getString(title);
+  Map<String, String> restoreFilteredEmojis(String title) {
+    String emojiJson = _sharedPreferences.getString(title);
     if (emojiJson == null) {
       return null;
     }
@@ -452,6 +462,10 @@ class _EmojiPickerState extends State<EmojiPicker2> {
   }
 
   Future updateEmojis() async {
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+
     smileyMap = await getAvailableEmojis(emojiList.smileys, title: 'smileys');
     animalMap = await getAvailableEmojis(emojiList.animals, title: 'animals');
     foodMap = await getAvailableEmojis(emojiList.foods, title: 'foods');
@@ -484,10 +498,10 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     List<_Recommended> recommendedEmojis = [];
     List<Widget> recommendedPages = [];
 
-    final onPressed = (int index, int i, emojiMap) {
+    final onPressed = (int index, int i, Map<String, String> emojiMap) async {
       var emoji =
           emojiMap.values.toList()[index + (widget.columns * widget.rows * i)];
-      skinColorDialog(context, emoji).then((returnEmoji) =>
+      await skinColorDialog(context, emoji).then((returnEmoji) =>
           widget.onEmojiSelected(
               Emoji(
                   name: emojiMap.keys
@@ -728,7 +742,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, smileyPages)));
+                          onPressed: () => onPressed(index, i, smileyMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -741,7 +755,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, smileyPages)));
+                          onPressed: () => onPressed(index, i, smileyMap)));
                   break;
                 default:
                   return Container();
@@ -784,7 +798,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, animalPages)));
+                          onPressed: () => onPressed(index, i, animalMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -798,7 +812,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, animalPages)));
+                          onPressed: () => onPressed(index, i, animalMap)));
 
                   break;
                 default:
@@ -843,7 +857,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, foodMap)));
+                          onPressed: () => onPressed(index, i, foodMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -857,7 +871,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, foodMap)));
+                          onPressed: () => onPressed(index, i, foodMap)));
                   break;
                 default:
                   return Container();
@@ -901,7 +915,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, travelPages)));
+                          onPressed: () => onPressed(index, i, travelMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -915,7 +929,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, travelPages)));
+                          onPressed: () => onPressed(index, i, travelMap)));
                   break;
                 default:
                   return Container();
@@ -962,7 +976,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, activityPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, activityMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -975,7 +990,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, activityPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, activityMap)));
                   break;
                 default:
                   return Container();
@@ -1019,7 +1035,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, objectPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, objectMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -1033,7 +1050,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, objectPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, objectMap)));
                   break;
                 default:
                   return Container();
@@ -1077,7 +1095,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, symbolPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, symbolMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -1091,7 +1110,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, symbolPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, symbolMap)));
                   break;
                 default:
                   return Container();
@@ -1135,7 +1155,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, flagPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, flagMap)));
                   break;
                 case ButtonMode.CUPERTINO:
                   return Center(
@@ -1149,7 +1170,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                               style: TextStyle(fontSize: 24),
                             ),
                           ),
-                          onPressed: onPressed(index, i, flagPages)));
+                          onPressed: () async =>
+                              await onPressed(index, i, flagMap)));
                   break;
                 default:
                   return Container();
