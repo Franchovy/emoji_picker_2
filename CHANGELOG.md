@@ -1,3 +1,9 @@
+## [0.2.0] - 22/07/2021
+* Updated dart version to 2.3.0
+* Fixed skin tone prompt
+* Added skin tone selection
+* Skin tone prompt filters by availability
+
 ## [0.1.1] - 19/07/2021
 * Updated to current flutter version
 * Updated package to emoji_picker_2
