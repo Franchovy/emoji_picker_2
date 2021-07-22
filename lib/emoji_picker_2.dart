@@ -328,10 +328,12 @@ class _EmojiPickerState extends State<EmojiPicker2> {
   }
 
   Future<String> skinColorDialog(BuildContext context, String emoji) async {
-    var returnEmoji = emoji;
+    var returnEmoji;
 
-    final Function onTap = (BuildContext context) {
-      returnEmoji = emoji;
+    final Function onTap = (BuildContext context, {int skinCode}) {
+      returnEmoji = skinCode == null
+          ? emoji
+          : String.fromCharCodes([...emoji.codeUnits, ...units(skinCode)]);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
       });
@@ -348,7 +350,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              GestureDetector(child: Text(emoji)),
+              GestureDetector(
+                  child: Text(emoji), onTap: () => onTap(context, null)),
               for (var skinCode in [
                 0x1F3FB,
                 0x1F3FC,
@@ -359,7 +362,7 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                 GestureDetector(
                   child: Text(String.fromCharCodes(
                       [...emoji.codeUnits, ...units(skinCode)])),
-                  onTap: () => onTap(context),
+                  onTap: () => onTap(context, skinCode),
                 ),
             ],
           ),
@@ -501,6 +504,9 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     final onPressed = (int index, int i, Map<String, String> emojiMap) async {
       var emoji =
           emojiMap.values.toList()[index + (widget.columns * widget.rows * i)];
+
+//      if (canApplySkinTone(emoji)) {
+      // Present / await skin tone dialog and callback on select
       await skinColorDialog(context, emoji).then((returnEmoji) =>
           widget.onEmojiSelected(
               Emoji(
@@ -508,6 +514,15 @@ class _EmojiPickerState extends State<EmojiPicker2> {
                       .toList()[index + (widget.columns * widget.rows * i)],
                   emoji: returnEmoji),
               widget.selectedCategory));
+//      } else {
+      // Callback with selected emoji
+//        widget.onEmojiSelected(
+//            Emoji(
+//                name: emojiMap.keys
+//                    .toList()[index + (widget.columns * widget.rows * i)],
+//                emoji: emoji),
+//            widget.selectedCategory);
+//      }
     };
 
     if (widget.recommendKeywords != null) {
