@@ -1,3 +1,6 @@
+## [0.2.1] - 29/07/2021
+* Fixed filenames for ios.
+
 ## [0.2.0] - 22/07/2021
 * Updated dart version to 2.3.0
 * Fixed skin tone prompt
