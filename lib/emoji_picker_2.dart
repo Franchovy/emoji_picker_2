@@ -1,5 +1,6 @@
 library emoji_picker_2;
 
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
@@ -283,14 +284,14 @@ class _EmojiPickerState extends State<EmojiPicker2> {
   List<String> allEmojis = [];
   List<String> recentEmojis = [];
 
-  Map<String, String> smileyMap = new Map();
-  Map<String, String> animalMap = new Map();
-  Map<String, String> foodMap = new Map();
-  Map<String, String> travelMap = new Map();
-  Map<String, String> activityMap = new Map();
-  Map<String, String> objectMap = new Map();
-  Map<String, String> symbolMap = new Map();
-  Map<String, String> flagMap = new Map();
+  LinkedHashMap<String, String> smileyMap = new LinkedHashMap();
+  LinkedHashMap<String, String> animalMap = new LinkedHashMap();
+  LinkedHashMap<String, String> foodMap = new LinkedHashMap();
+  LinkedHashMap<String, String> travelMap = new LinkedHashMap();
+  LinkedHashMap<String, String> activityMap = new LinkedHashMap();
+  LinkedHashMap<String, String> objectMap = new LinkedHashMap();
+  LinkedHashMap<String, String> symbolMap = new LinkedHashMap();
+  LinkedHashMap<String, String> flagMap = new LinkedHashMap();
 
   bool loaded = false;
 
@@ -401,19 +402,20 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     }
   }
 
-  Future<Map<String, String>> _getFiltered(Map<String, String> emoji) async {
+  /// Mutating function removing unsupported emojis from the input list
+  void _filterUnsupportedEmojis(LinkedHashMap<String, String> emoji) async {
     if (Platform.isAndroid) {
-      Map<String, String> filtered;
+      LinkedHashMap<String, String> filtered;
       try {
         var temp =
             await platform.invokeMethod("checkAvailability", {'emoji': emoji});
-        filtered = Map<String, String>.from(temp);
+        filtered = LinkedHashMap<String, String>.from(temp);
       } on PlatformException catch (_) {
         filtered = null;
       }
-      return filtered;
-    } else {
-      return emoji;
+
+      // Filter the emojis that have been filtered.
+      emoji.removeWhere((key, value) => !filtered.containsValue(value));
     }
   }
 
@@ -444,36 +446,35 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     });
   }
 
-  Future<Map<String, String>> getAvailableEmojis(Map<String, String> map,
+  Future<LinkedHashMap<String, String>> getAvailableEmojis(
+      LinkedHashMap<String, String> map,
       {@required String title}) async {
-    Map<String, String> newMap;
-
-    newMap = restoreFilteredEmojis(title);
+    LinkedHashMap<String, String> newMap = restoreFilteredEmojis(title);
 
     if (newMap != null) {
       return newMap;
+    } else {
+      await _filterUnsupportedEmojis(map);
+
+      cacheFilteredEmojis(title, map);
+
+      return map;
     }
-
-    newMap = await _getFiltered(map);
-
-    cacheFilteredEmojis(title, newMap);
-
-    return newMap;
   }
 
-  void cacheFilteredEmojis(String title, Map<String, String> emojis) {
+  void cacheFilteredEmojis(String title, LinkedHashMap<String, String> emojis) {
     String emojiJson = jsonEncode(emojis);
     _sharedPreferences.setString(title, emojiJson);
     return;
   }
 
-  Map<String, String> restoreFilteredEmojis(String title) {
+  LinkedHashMap<String, String> restoreFilteredEmojis(String title) {
     String emojiJson = _sharedPreferences.getString(title);
     if (emojiJson == null) {
       return null;
     }
-    Map<String, String> emojis =
-        Map<String, String>.from(jsonDecode(emojiJson));
+    LinkedHashMap<String, String> emojis =
+        LinkedHashMap<String, String>.from(jsonDecode(emojiJson));
     return emojis;
   }
 
@@ -514,7 +515,8 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     List<_Recommended> recommendedEmojis = [];
     List<Widget> recommendedPages = [];
 
-    final onPressed = (int index, int i, Map<String, String> emojiMap) async {
+    final onPressed =
+        (int index, int i, LinkedHashMap<String, String> emojiMap) async {
       var emoji =
           emojiMap.values.toList()[index + (widget.columns * widget.rows * i)];
 
@@ -741,477 +743,37 @@ class _EmojiPickerState extends State<EmojiPicker2> {
     smileyPagesNum =
         (smileyMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> smileyPages = [];
-
-    for (var i = 0; i < smileyPagesNum; i++) {
-      smileyPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                smileyMap.values.toList().length) {
-              String emojiTxt = smileyMap.values
-                  .toList()[index + (widget.columns * widget.rows * i)];
-
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              emojiTxt,
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, smileyMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              emojiTxt,
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, smileyMap)));
-                  break;
-                default:
-                  return Container();
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     animalPagesNum =
         (animalMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> animalPages = [];
-
-    for (var i = 0; i < animalPagesNum; i++) {
-      animalPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                animalMap.values.toList().length) {
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              animalMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, animalMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              animalMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, animalMap)));
-
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     foodPagesNum =
         (foodMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> foodPages = [];
-
-    for (var i = 0; i < foodPagesNum; i++) {
-      foodPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                foodMap.values.toList().length) {
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              foodMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, foodMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              foodMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, foodMap)));
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     travelPagesNum =
         (travelMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> travelPages = [];
-
-    for (var i = 0; i < travelPagesNum; i++) {
-      travelPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                travelMap.values.toList().length) {
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              travelMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, travelMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              travelMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () => onPressed(index, i, travelMap)));
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     activityPagesNum =
         (activityMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> activityPages = [];
-
-    for (var i = 0; i < activityPagesNum; i++) {
-      activityPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                activityMap.values.toList().length) {
-              String emojiTxt = activityMap.values
-                  .toList()[index + (widget.columns * widget.rows * i)];
-
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              activityMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, activityMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              emojiTxt,
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, activityMap)));
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     objectPagesNum =
         (objectMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> objectPages = [];
-
-    for (var i = 0; i < objectPagesNum; i++) {
-      objectPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                objectMap.values.toList().length) {
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              objectMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, objectMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              objectMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, objectMap)));
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     symbolPagesNum =
         (symbolMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
-
-    List<Widget> symbolPages = [];
-
-    for (var i = 0; i < symbolPagesNum; i++) {
-      symbolPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                symbolMap.values.toList().length) {
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              symbolMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, symbolMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              symbolMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, symbolMap)));
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
-
     flagPagesNum =
         (flagMap.values.toList().length / (widget.rows * widget.columns))
             .ceil();
 
-    List<Widget> flagPages = [];
-
-    for (var i = 0; i < flagPagesNum; i++) {
-      flagPages.add(Container(
-        color: widget.bgColor,
-        child: GridView.count(
-          shrinkWrap: true,
-          primary: true,
-          crossAxisCount: widget.columns,
-          children: List.generate(widget.rows * widget.columns, (index) {
-            if (index + (widget.columns * widget.rows * i) <
-                flagMap.values.toList().length) {
-              switch (widget.buttonMode) {
-                case ButtonMode.MATERIAL:
-                  return Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.all(0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              flagMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, flagMap)));
-                  break;
-                case ButtonMode.CUPERTINO:
-                  return Center(
-                      child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              flagMap.values.toList()[
-                                  index + (widget.columns * widget.rows * i)],
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () async =>
-                              await onPressed(index, i, flagMap)));
-                  break;
-                default:
-                  return Container();
-                  break;
-              }
-            } else {
-              return Container();
-            }
-          }),
-        ),
-      ));
-    }
+    List<Widget> smileyPages = getPages(smileyMap, smileyPagesNum, onPressed);
+    List<Widget> animalPages = getPages(animalMap, animalPagesNum, onPressed);
+    List<Widget> foodPages = getPages(foodMap, foodPagesNum, onPressed);
+    List<Widget> travelPages = getPages(travelMap, travelPagesNum, onPressed);
+    List<Widget> activityPages =
+        getPages(activityMap, activityPagesNum, onPressed);
+    List<Widget> objectPages = getPages(objectMap, objectPagesNum, onPressed);
+    List<Widget> symbolPages = getPages(symbolMap, symbolPagesNum, onPressed);
+    List<Widget> flagPages = getPages(flagMap, flagPagesNum, onPressed);
 
     pages.addAll(recommendedPages);
     pages.addAll(recentPages);
@@ -1304,6 +866,68 @@ class _EmojiPickerState extends State<EmojiPicker2> {
             style: widget.noRecentsStyle,
           )));
     }
+  }
+
+  List<Widget> getPages(
+      LinkedHashMap<String, String> map,
+      int numPages,
+      Future<Null> Function(int, int, LinkedHashMap<String, String>)
+          onPressed) {
+    List<Widget> pages = [];
+
+    for (var i = 0; i < numPages; i++) {
+      pages.add(Container(
+        color: widget.bgColor,
+        child: GridView.count(
+          shrinkWrap: true,
+          primary: true,
+          crossAxisCount: widget.columns,
+          children: List.generate(widget.rows * widget.columns, (index) {
+            if (index + (widget.columns * widget.rows * i) <
+                map.values.toList().length) {
+              String emojiTxt = map.values
+                  .toList()[index + (widget.columns * widget.rows * i)];
+
+              switch (widget.buttonMode) {
+                case ButtonMode.MATERIAL:
+                  return Center(
+                      child: TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              emojiTxt,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: () => onPressed(index, i, map)));
+                  break;
+                case ButtonMode.CUPERTINO:
+                  return Center(
+                      child: CupertinoButton(
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              emojiTxt,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: () => onPressed(index, i, map)));
+                  break;
+                default:
+                  return Container();
+              }
+            } else {
+              return Container();
+            }
+          }),
+        ),
+      ));
+    }
+
+    return pages;
   }
 
   Widget defaultButton(CategoryIcon categoryIcon) {

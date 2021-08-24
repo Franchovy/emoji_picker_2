@@ -1,5 +1,7 @@
-/// Map of all possible emojis along with their names in [Category.SMILEYS]
-final Map<String, String> smileys = new Map.fromIterables([
+import 'dart:collection';
+
+/// LinkedHashMap of all possible emojis along with their names in [Category.SMILEYS]
+final LinkedHashMap<String, String> smileys = new LinkedHashMap.fromIterables([
   'Grinning Face',
   'Grinning Face With Big Eyes',
   'Grinning Face With Smiling Eyes',
@@ -723,8 +725,8 @@ final Map<String, String> smileys = new Map.fromIterables([
   '💼'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.ANIMALS]
-final Map<String, String> animals = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.ANIMALS]
+final LinkedHashMap<String, String> animals = new LinkedHashMap.fromIterables([
   'See-No-Evil Monkey',
   'Hear-No-Evil Monkey',
   'Speak-No-Evil Monkey',
@@ -1090,8 +1092,8 @@ final Map<String, String> animals = new Map.fromIterables([
   '🎍'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.FOODS]
-final Map<String, String> foods = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.FOODS]
+final LinkedHashMap<String, String> foods = new LinkedHashMap.fromIterables([
   'Grapes',
   'Melon',
   'Watermelon',
@@ -1305,10 +1307,10 @@ final Map<String, String> foods = new Map.fromIterables([
   '🥄'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.TRAVEL]
-final Map<String, String> travel = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.TRAVEL]
+final LinkedHashMap<String, String> travel = new LinkedHashMap.fromIterables([
   'Person Rowing Boat',
-  'Map of Japan',
+  'LinkedHashMap of Japan',
   'Snow-Capped Mountain',
   'Mountain',
   'Volcano',
@@ -1560,8 +1562,9 @@ final Map<String, String> travel = new Map.fromIterables([
   '🛅'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.ACTIVITIES]
-final Map<String, String> activities = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.ACTIVITIES]
+final LinkedHashMap<String, String> activities =
+    new LinkedHashMap.fromIterables([
   'Man in Suit Levitating',
   'Man Climbing',
   'Woman Climbing',
@@ -1749,8 +1752,8 @@ final Map<String, String> activities = new Map.fromIterables([
   '🏹'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.OBJECTS]
-final Map<String, String> objects = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.OBJECTS]
+final LinkedHashMap<String, String> objects = new LinkedHashMap.fromIterables([
   'Love Letter',
   'Hole',
   'Bomb',
@@ -1758,7 +1761,7 @@ final Map<String, String> objects = new Map.fromIterables([
   'Person in Bed',
   'Kitchen Knife',
   'Amphora',
-  'World Map',
+  'World LinkedHashMap',
   'Compass',
   'Brick',
   'Barber Pole',
@@ -2150,8 +2153,8 @@ final Map<String, String> objects = new Map.fromIterables([
   '🚰'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.SYMBOLS]
-final Map<String, String> symbols = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.SYMBOLS]
+final LinkedHashMap<String, String> symbols = new LinkedHashMap.fromIterables([
   'Heart With Arrow',
   'Heart With Ribbon',
   'Sparkling Heart',
@@ -2673,8 +2676,8 @@ final Map<String, String> symbols = new Map.fromIterables([
   '🔲'
 ]);
 
-/// Map of all possible emojis along with their names in [Category.FLAGS]
-final Map<String, String> flags = new Map.fromIterables([
+/// LinkedHashMap of all possible emojis along with their names in [Category.FLAGS]
+final LinkedHashMap<String, String> flags = new LinkedHashMap.fromIterables([
   'Chequered Flag',
   'Triangular Flag',
   'Crossed Flags',
