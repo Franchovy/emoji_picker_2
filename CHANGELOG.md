@@ -1,3 +1,7 @@
+## [0.3.0] - 24/08/2021
+* Fixed display order of emojis
+* Applied some more DRY
+
 ## [0.2.1] - 29/07/2021
 * Fixed filenames for ios.
 
