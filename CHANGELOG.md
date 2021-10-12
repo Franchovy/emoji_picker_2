@@ -1,3 +1,7 @@
+## [0.4.0] - 24/08/2021
+* Updated dependencies versioning
+* Updated dart SDK versioning
+
 ## [0.3.0] - 24/08/2021
 * Fixed display order of emojis
 * Applied some more DRY
